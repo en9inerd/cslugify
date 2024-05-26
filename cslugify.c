@@ -797,6 +797,9 @@ static const Locale locales[MAX_LOCALES] = {
 
 static const char *lookup_char_map(wchar_t ch) {
   for (int i = 0; i < MAX_CHAR_MAP; ++i) {
+    if (charMap[i].value == NULL) {
+      break;
+    }
     if (charMap[i].key == ch) {
       return charMap[i].value;
     }
@@ -806,6 +809,9 @@ static const char *lookup_char_map(wchar_t ch) {
 
 static const char *lookup_locale_map(const char *locale, wchar_t ch) {
   for (int i = 0; i < MAX_LOCALES; ++i) {
+    if (locales[i].locale == NULL) {
+      break;
+    }
     if (strcmp(locales[i].locale, locale) == 0) {
       for (int j = 0; j < locales[i].size; ++j) {
         if (locales[i].entries[j].key == ch) {
@@ -825,7 +831,7 @@ void slugify(const wchar_t *input, char *output,
   int out_index = 0;
   wchar_t buffer[MAX_BUFFER_SIZE];
 
-  for (int i = 0; i < len; ++i) {
+  for (int i = 0; i < len && out_index < MAX_BUFFER_SIZE - 1; ++i) {
     const char *mapped = NULL;
     if (options->locale) {
       mapped = lookup_locale_map(options->locale, input[i]);
@@ -836,7 +842,7 @@ void slugify(const wchar_t *input, char *output,
     if (!mapped) {
       buffer[out_index++] = input[i];
     } else {
-      while (*mapped) {
+      while (*mapped && out_index < MAX_BUFFER_SIZE - 1) {
         buffer[out_index++] = *mapped++;
       }
     }
@@ -844,10 +850,30 @@ void slugify(const wchar_t *input, char *output,
   buffer[out_index] = L'\0';
 
   out_index = 0;
-  len = wcslen(buffer);
+  int len_buffer = wcslen(buffer);
   int in_space = 0;
 
-  for (int i = 0; i < len; ++i) {
+  int start = 0;
+  int end = len_buffer;
+
+  // Test failed: '  No trim  ' -> 'no-trim' (expected: '-no-trim-')
+  // if (trim) {
+  //   while (start < len_buffer &&
+  //          (buffer[start] == L' ' || buffer[start] == replacement)) {
+  //     start++;
+  //   }
+  //   while (end > start &&
+  //          (buffer[end - 1] == L' ' || buffer[end - 1] == replacement)) {
+  //     end--;
+  //   }
+  // }
+  // it doesn't work because it doesn't add the replacement character at the
+  // beginning and end of the string
+
+  // Test failed: '  No trim  ' -> '-no-trim' (expected: '-no-trim-')
+  // fix trim
+
+  for (int i = start; i < end && out_index < MAX_BUFFER_SIZE - 1; ++i) {
     wchar_t ch = buffer[i];
     if (options->remove && wcschr(options->remove, ch)) {
       continue;
@@ -866,8 +892,19 @@ void slugify(const wchar_t *input, char *output,
     }
   }
 
+  if (!trim) {
+    if (start > 0) {
+      memmove(output + 1, output, out_index);
+      output[0] = replacement;
+      out_index++;
+    }
+    if (end < len_buffer) {
+      output[out_index++] = replacement;
+    }
+  }
+
   if (trim && out_index > 0 && output[out_index - 1] == replacement) {
     out_index--;
   }
-  output[out_index] = L'\0';
+  output[out_index] = '\0';
 }
