@@ -4,7 +4,7 @@
 #include <wchar.h>
 
 #define MAX_BUFFER_SIZE 1024
-#define MAX_CHAR_MAP 512
+#define MAX_CHAR_MAP 1024
 #define MAX_LOCALE_MAP 128
 #define MAX_LOCALES 16
 
