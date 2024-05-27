@@ -22,7 +22,7 @@ int main() {
   // Set locale to support wide characters
   setlocale(LC_ALL, "");
 
-  SlugifyOptions default_options = {'-', NULL, 1, 0, NULL, 1};
+  SlugifyOptions default_options = {'-', NULL, 1, 0, NULL, true};
 
   test_slugify(L"Hello World", "hello-world", &default_options);
   test_slugify(L"  Leading and trailing spaces  ",
@@ -31,33 +31,32 @@ int main() {
                &default_options);
   test_slugify(L"Multilingüe Ñandú", "multilingue-nandu", &default_options);
 
-  // it's still failing
-  SlugifyOptions no_trim_options = {'-', NULL, 1, 0, NULL, 0};
+  SlugifyOptions no_trim_options = {'-', NULL, 1, 0, NULL, false};
   test_slugify(L"  No trim  ", "-no-trim-", &no_trim_options);
 
-  SlugifyOptions no_lower_options = {'-', NULL, 0, 0, NULL, 1};
+  SlugifyOptions no_lower_options = {'-', NULL, 0, 0, NULL, true};
   test_slugify(L"Hello World", "Hello-World", &no_lower_options);
 
-  SlugifyOptions custom_replacement_options = {'_', NULL, 1, 0, NULL, 1};
+  SlugifyOptions custom_replacement_options = {'_', NULL, 1, 0, NULL, true};
   test_slugify(L"Hello World", "hello_world", &custom_replacement_options);
 
-  SlugifyOptions strict_options = {'-', NULL, 1, 1, NULL, 1};
+  SlugifyOptions strict_options = {'-', NULL, 1, 1, NULL, true};
   test_slugify(L"Hello! World?", "hello-world", &strict_options);
 
-  SlugifyOptions remove_options = {'-', L"o", 1, 0, NULL, 1};
+  SlugifyOptions remove_options = {'-', L"o", 1, 0, NULL, true};
   test_slugify(L"Hello World", "hell-wrld", &remove_options);
 
-  SlugifyOptions locale_fr_options = {'-', NULL, 1, 0, "fr", 1};
+  SlugifyOptions locale_fr_options = {'-', NULL, 1, 0, "fr", true};
   test_slugify(L"5% & < > | ¢ £ ¤ ₣ ∑ ∞ ♥",
                "5pourcent-et-plus-petit-plus-grand-ou-centime-livre-devise-"
                "franc-somme-infini-amour",
                &locale_fr_options);
 
-  SlugifyOptions locale_bg_options = {'-', NULL, 1, 0, "bg", 1};
+  SlugifyOptions locale_bg_options = {'-', NULL, 1, 0, "bg", true};
   test_slugify(L"Й Ц Щ Ъ Ь й ц щ ъ ь", "y-ts-sht-a-y-y-ts-sht-a-y",
                &locale_bg_options);
 
-  SlugifyOptions locale_vi_options = {'-', NULL, 1, 0, "vi", 1};
+  SlugifyOptions locale_vi_options = {'-', NULL, 1, 0, "vi", true};
   test_slugify(L"Đây là tiếng Việt", "day-la-tieng-viet", &locale_vi_options);
 
   return 0;

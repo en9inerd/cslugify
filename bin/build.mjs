@@ -80,4 +80,4 @@ async function main() {
   await updateLocales();
 }
 
-main();
+await main();

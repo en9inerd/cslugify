@@ -1,8 +1,10 @@
 #ifndef SLUGIFY_H
 #define SLUGIFY_H
 
+#include <stdbool.h>
 #include <wchar.h>
 
+#define DEFAULT_REMOVE L"$*_+~.()\"'!?-:@"
 #define MAX_BUFFER_SIZE 1024
 #define MAX_CHAR_MAP 1024
 #define MAX_LOCALE_MAP 128
@@ -22,10 +24,10 @@ typedef struct {
 typedef struct {
   char replacement;
   const wchar_t *remove;
-  int lower;
-  int strict;
+  bool lower;
+  bool strict;
   const char *locale;
-  int trim;
+  bool trim;
 } SlugifyOptions;
 
 void slugify(const wchar_t *input, char *output, const SlugifyOptions *options);

@@ -825,8 +825,10 @@ static const char *lookup_locale_map(const char *locale, wchar_t ch) {
 
 void slugify(const wchar_t *input, char *output,
              const SlugifyOptions *options) {
-  char replacement = options->replacement ? options->replacement : '-';
-  int trim = options->trim ? options->trim : 1;
+  const wchar_t *remove_set =
+      options->remove ? options->remove : DEFAULT_REMOVE;
+  char replacement = options->replacement;
+  bool trim = options->trim;
   int len = wcslen(input);
   int out_index = 0;
   wchar_t buffer[MAX_BUFFER_SIZE];
@@ -856,26 +858,20 @@ void slugify(const wchar_t *input, char *output,
   int start = 0;
   int end = len_buffer;
 
-  // Test failed: '  No trim  ' -> 'no-trim' (expected: '-no-trim-')
-  // if (trim) {
-  //   while (start < len_buffer &&
-  //          (buffer[start] == L' ' || buffer[start] == replacement)) {
-  //     start++;
-  //   }
-  //   while (end > start &&
-  //          (buffer[end - 1] == L' ' || buffer[end - 1] == replacement)) {
-  //     end--;
-  //   }
-  // }
-  // it doesn't work because it doesn't add the replacement character at the
-  // beginning and end of the string
-
-  // Test failed: '  No trim  ' -> '-no-trim' (expected: '-no-trim-')
-  // fix trim
+  if (trim) {
+    while (start < len_buffer &&
+           (buffer[start] == L' ' || buffer[start] == replacement)) {
+      start++;
+    }
+    while (end > start &&
+           (buffer[end - 1] == L' ' || buffer[end - 1] == replacement)) {
+      end--;
+    }
+  }
 
   for (int i = start; i < end && out_index < MAX_BUFFER_SIZE - 1; ++i) {
     wchar_t ch = buffer[i];
-    if (options->remove && wcschr(options->remove, ch)) {
+    if (wcschr(remove_set, ch)) {
       continue;
     }
     if (ch == L' ' || ch == replacement) {

@@ -5,6 +5,9 @@ SOURCES = cslugify.c test/test_slugify.c
 
 all: $(TARGET)
 
+build:
+	node bin/build.mjs
+
 $(TARGET): $(SOURCES)
 	$(CC) $(CFLAGS) -o $@ $^
 
